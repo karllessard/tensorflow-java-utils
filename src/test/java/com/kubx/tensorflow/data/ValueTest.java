@@ -6,6 +6,8 @@ import static com.kubx.tensorflow.data.index.TFIndex.sequence;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.nio.IntBuffer;
+
 import org.junit.Test;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
@@ -18,6 +20,16 @@ public class ValueTest {
     try (Tensor<Integer> t = Tensors.create(scalar)) {
       IntValue value = IntValue.of(t);
       assertEquals(1L, value.size());
+      assertEquals(scalar, value.scalar());
+    }
+  }
+  
+  @Test
+  public void setScalar() {
+    int scalar = 10;
+    try (Tensor<Integer> t = Tensors.create(0)) {
+      IntValue value = IntValue.of(t);
+      value.scalar(scalar);
       assertEquals(scalar, value.scalar());
     }
   }
@@ -59,7 +71,18 @@ public class ValueTest {
     int[] vector = new int[] {1, 2, 3};
     try (Tensor<Integer> t = Tensors.create(vector)) {
       IntValue value = IntValue.of(t);
-      assertEquals(3, value.size());
+      assertBufferEquals(IntBuffer.wrap(vector), value.vector());
+    }
+  }
+  
+  @Test
+  public void resetVector() {
+    int[] originalVector = new int[] {1, 2, 3};
+    int[] newVector = new int[] {4, 5, 6};
+    try (Tensor<Integer> t = Tensors.create(originalVector)) {
+      IntValue value = IntValue.of(t);
+      value.vector().put(newVector);
+      assertBufferEquals(IntBuffer.wrap(newVector), value.vector());
     }
   }
   
@@ -93,9 +116,7 @@ public class ValueTest {
     try (Tensor<Integer> t = Tensors.create(matrix)) {
       IntValue value = IntValue.of(t).at(1);
       assertEquals(3, value.size());
-      assertEquals(4, value.at(0).scalar());
-      assertEquals(5, value.at(1).scalar());
-      assertEquals(6, value.at(2).scalar());
+      assertBufferEquals(IntBuffer.wrap(matrix[1]), value.vector());
     }
   }
 
@@ -120,10 +141,10 @@ public class ValueTest {
       assertEquals(2, value.size());
       IntValue vector1 = value.at(0);
       assertEquals(3, vector1.size());
-      assertEquals(4, vector1.at(0).scalar());
+      assertBufferEquals(IntBuffer.wrap(matrix[1]), vector1.vector());
       IntValue vector2 = value.at(1);
       assertEquals(3, vector2.size());
-      assertEquals(7, vector2.at(0).scalar());
+      assertBufferEquals(IntBuffer.wrap(matrix[2]), vector2.vector());
     }
   }
   
@@ -402,12 +423,11 @@ public class ValueTest {
       assertBufferEquals(IntBuffer.wrap(matrix4d[1][1][2]), matrixC.vector());
     }
   }
-  
+*/  
   private static void assertBufferEquals(IntBuffer buf1, IntBuffer buf2) {
     assertEquals(buf1.remaining(), buf2.remaining());
     while (buf1.remaining() > 0) {
       assertEquals(buf1.get(), buf2.get());
     }
   }
-  */
 }

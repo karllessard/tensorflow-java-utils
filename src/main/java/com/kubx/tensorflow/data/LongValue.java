@@ -19,18 +19,17 @@ public class LongValue extends Value<LongValue, LongBuffer> {
   }
 
   public static LongValue of(Tensor<Long> t) {
-    return of(t.buffer().asLongBuffer(), t.shape());
-  }
-
-  public static LongValue of(LongBuffer buffer, long[] shape) {
-    return new LongValue(buffer, 0, toIndices(shape));
+    return new LongValue(t.buffer().asLongBuffer(), 0, toIndices(t.shape()));
   }
   
   public long scalar() {
-    if (indices.size() > 0) {
-      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to scalar");
-    }
-    return buffer.get(0);
+    checkScalar();
+    return buffer.get(position);
+  }
+
+  public void scalar(long scalar) {
+    checkScalar();
+    buffer.put(position, scalar);
   }
   
   @Override
@@ -39,7 +38,7 @@ public class LongValue extends Value<LongValue, LongBuffer> {
   }
   
   @Override
-  protected LongBuffer slice() {
+  protected LongBuffer sliceBuffer(LongBuffer buffer) {
     return buffer.slice();
   }
   

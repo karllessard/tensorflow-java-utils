@@ -10,8 +10,13 @@ public class OffsetIndex extends Index {
   }
 
   @Override
-  public int position(int index) {
+  protected int position(int index) {
     return offset * index;
+  }
+
+  @Override
+  protected boolean vectorizable() {
+    return offset == 1;
   }
   
   public int offset() {

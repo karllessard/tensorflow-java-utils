@@ -19,18 +19,17 @@ public class FloatValue extends Value<FloatValue, FloatBuffer> {
   }
 
   public static FloatValue of(Tensor<Float> t) {
-    return of(t.buffer().asFloatBuffer(), t.shape());
-  }
-
-  public static FloatValue of(FloatBuffer buffer, long[] shape) {
-    return new FloatValue(buffer, 0, toIndices(shape));
+    return new FloatValue(t.buffer().asFloatBuffer(), 0, toIndices(t.shape()));
   }
   
   public float scalar() {
-    if (indices.size() > 0) {
-      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to scalar");
-    }
-    return buffer.get(0);
+    checkScalar();
+    return buffer.get(position);
+  }
+  
+  public void scalar(float scalar) {
+    checkScalar();
+    buffer.put(position, scalar);
   }
   
   @Override
@@ -39,7 +38,7 @@ public class FloatValue extends Value<FloatValue, FloatBuffer> {
   }
   
   @Override
-  protected FloatBuffer slice() {
+  protected FloatBuffer sliceBuffer(FloatBuffer buffer) {
     return buffer.slice();
   }
   

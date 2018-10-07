@@ -19,18 +19,17 @@ public class DoubleValue extends Value<DoubleValue, DoubleBuffer> {
   }
 
   public static DoubleValue of(Tensor<Double> t) {
-    return of(t.buffer().asDoubleBuffer(), t.shape());
-  }
-
-  public static DoubleValue of(DoubleBuffer buffer, long[] shape) {
-    return new DoubleValue(buffer, 0, toIndices(shape));
+    return new DoubleValue(t.buffer().asDoubleBuffer(), 0, toIndices(t.shape()));
   }
   
   public double scalar() {
-    if (indices.size() > 0) {
-      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to scalar");
-    }
-    return buffer.get(0);
+    checkScalar();
+    return buffer.get(position);
+  }
+  
+  public void scalar(double scalar) {
+    checkScalar();
+    buffer.put(position, scalar);
   }
   
   @Override
@@ -39,7 +38,7 @@ public class DoubleValue extends Value<DoubleValue, DoubleBuffer> {
   }
   
   @Override
-  protected DoubleBuffer slice() {
+  protected DoubleBuffer sliceBuffer(DoubleBuffer buffer) {
     return buffer.slice();
   }
   

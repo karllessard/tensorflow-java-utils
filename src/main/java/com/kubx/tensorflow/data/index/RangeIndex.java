@@ -10,8 +10,13 @@ public class RangeIndex extends Index {
   }
 
   @Override
-  public int position(int index) {
+  protected int position(int index) {
     return start + index;
+  }  
+  
+  @Override
+  protected boolean vectorizable() {
+    return true;
   }
   
   public RangeIndex(int end) {

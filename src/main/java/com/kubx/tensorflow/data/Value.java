@@ -3,6 +3,7 @@ package com.kubx.tensorflow.data;
 import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,18 +14,25 @@ abstract class Value<T, U extends Buffer> {
   public long size() {
     return indices.isEmpty() ? 1L : indices.get(0).size();
   }
- /* 
+  
   public U vector() {
-    // FIXME not all 1-dim values could be tranformed to a vector
-    if (dims.size() != 1) {
-      throw new IllegalArgumentException("Cannot convert value of " + dims.size() + " dimensions to vector");
+    if (indices.size() != 1) {
+      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to vector");
     }
-    buffer.position(position);
-    U vector = slice();
-    vector.limit(dims.get(0).size());
-    return vector;
+    Index index = indices.get(0);
+    if (!index.vectorizable()) {
+      throw new IllegalArgumentException("Current indexation in value does not support data vectorization");
+    }
+    // We need to slice twice to be thread-safe and preserve the immutability of the current value: 
+    // - the first time, we get a copy of the original buffer
+    // - the second time, we reset its start position
+    U vectorBuffer = sliceBuffer(buffer);
+    vectorBuffer.position(position);
+    vectorBuffer = sliceBuffer(vectorBuffer);
+    vectorBuffer.limit(index.position(index.size()));
+    return vectorBuffer;
   }
- */ 
+  
   public T at(Object... indices) {
     if (indices == null) {
       throw new IllegalArgumentException("At least one index should be provided");
@@ -50,19 +58,6 @@ abstract class Value<T, U extends Buffer> {
     } 
     return newValue(buffer, newPosition, newIndices);
   }
-
-  protected abstract T newValue(U buffer, int position, List<Index> indices);
-  protected abstract U slice();
-
-  protected final List<Index> indices;
-  protected final U buffer;
-  protected final int position;
-  
-  protected Value(U buffer, int position, List<Index> indices) {
-    this.buffer = buffer;
-    this.indices = indices;
-    this.position = position;
-  }
   
   protected static List<Index> toIndices(long[] shape) {
     Index[] indices = new Index[shape.length];
@@ -76,4 +71,24 @@ abstract class Value<T, U extends Buffer> {
     }
     return Arrays.asList(indices);
   }
+  
+  protected final U buffer;
+  protected final int position;
+  
+  protected Value(U buffer, int position, List<Index> indices) {
+    this.buffer = buffer;
+    this.position = position;
+    this.indices = Collections.unmodifiableList(indices);
+  }
+
+  protected abstract T newValue(U buffer, int position, List<Index> indices);
+  protected abstract U sliceBuffer(U buffer);
+
+  protected void checkScalar() { 
+    if (indices.size() > 0) {
+      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to scalar");
+    }
+  }
+
+  private final List<Index> indices;
 }

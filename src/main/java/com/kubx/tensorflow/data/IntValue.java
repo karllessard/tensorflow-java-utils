@@ -19,18 +19,17 @@ public class IntValue extends Value<IntValue, IntBuffer> {
   }
 
   public static IntValue of(Tensor<Integer> t) {
-    return of(t.buffer().asIntBuffer(), t.shape());
-  }
-
-  public static IntValue of(IntBuffer buffer, long[] shape) {
-    return new IntValue(buffer, 0, toIndices(shape));
+    return new IntValue(t.buffer().asIntBuffer(), 0, toIndices(t.shape()));
   }
   
   public int scalar() {
-    if (indices.size() > 0) {
-      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to scalar");
-    }
+    checkScalar();
     return buffer.get(position);
+  }
+
+  public void scalar(int scalar) {
+    checkScalar();
+    buffer.put(position, scalar);
   }
   
   @Override
@@ -39,7 +38,7 @@ public class IntValue extends Value<IntValue, IntBuffer> {
   }
   
   @Override
-  protected IntBuffer slice() {
+  protected IntBuffer sliceBuffer(IntBuffer buffer) {
     return buffer.slice();
   }
   

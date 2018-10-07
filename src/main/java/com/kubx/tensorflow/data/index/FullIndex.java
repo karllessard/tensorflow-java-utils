@@ -10,7 +10,7 @@ public class FullIndex extends Index {
   }
 
   @Override
-  public int position(int i) {
+  protected int position(int i) {
     throw new UnsupportedOperationException();
   }
   

@@ -1,7 +1,7 @@
 package com.kubx.tensorflow.data.index;
 
-import com.kubx.tensorflow.data.IntValue;
 import com.kubx.tensorflow.data.Index;
+import com.kubx.tensorflow.data.IntValue;
 
 public class IntIndex extends Index {
 
@@ -11,7 +11,7 @@ public class IntIndex extends Index {
   }
 
   @Override
-  public int position(int i) {
+  protected int position(int i) {
     return value.at(i).scalar();
   }
   

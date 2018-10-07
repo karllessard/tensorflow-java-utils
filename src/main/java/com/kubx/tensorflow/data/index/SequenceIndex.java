@@ -10,10 +10,10 @@ public class SequenceIndex extends Index {
   }
 
   @Override
-  public int position(int i) {
+  protected int position(int i) {
     return sequence[i];
   }
-  
+
   public SequenceIndex(int... sequence) {
     this.sequence = sequence;
   }

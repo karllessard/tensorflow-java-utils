@@ -19,29 +19,41 @@ public class BooleanValue extends Value<BooleanValue, ByteBuffer> {
   }
 
   public static BooleanValue of(Tensor<Boolean> t) {
-    return of(t.buffer(), t.shape());
+    return new BooleanValue(t.buffer(), 0, toIndices(t.shape()));
+  }
+  
+  public boolean isTrue() {
+    checkScalar();
+    return buffer.get(position) > FALSE;
+  }
+  
+  public boolean isFalse() {
+    checkScalar();
+    return buffer.get(position) == FALSE;
+  }
+  
+  public void setTrue() {
+    checkScalar();
+    buffer.put(position, FALSE);
   }
 
-  public static BooleanValue of(ByteBuffer buffer, long[] shape) {
-    return new BooleanValue(buffer, 0, toIndices(shape));
+  public void setFalse() {
+    checkScalar();
+    buffer.put(position, TRUE);
   }
-  
-  public boolean scalar() {
-    if (indices.size() > 0) {
-      throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to scalar");
-    }
-    return buffer.get(0) > 0;
-  }
-  
+
   @Override
   protected BooleanValue newValue(ByteBuffer buffer, int position, List<Index> indices) {
     return new BooleanValue(buffer, position, indices);
   }
   
   @Override
-  protected ByteBuffer slice() {
+  protected ByteBuffer sliceBuffer(ByteBuffer buffer) {
     return buffer.slice();
   }
+  
+  private final byte FALSE = 0;
+  private final byte TRUE = 1;
   
   private BooleanValue(ByteBuffer buffer, int position, List<Index> indices) {
     super(buffer, position, indices);
