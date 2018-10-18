@@ -34,6 +34,8 @@ abstract class Value<T, U extends Buffer> {
       throw new IllegalArgumentException("Cannot convert value of " + indices.size() + " dimensions to vector");
     }
     Index index = indices.get(0);
+    // TODO allow any tensor of rank-1 to be converted into a vector, not only "rows" ones.
+    // This could be done by having our own implementation of IntBuffer.
     if (!index.vectorizable()) {
       throw new IllegalArgumentException("Current indexation in value does not support data vectorization");
     }
